@@ -1,0 +1,356 @@
+:root {
+  --bg: #0b0e16;
+  --ink: #f2f5fa;
+  --muted: #aab3c5;
+  --accent: #e8b13c;
+  --line: rgba(255, 255, 255, 0.14);
+  --card: rgba(10, 13, 20, 0.66);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Vazirmatn", "Segoe UI", Tahoma, system-ui, sans-serif;
+  overflow-x: hidden;
+}
+
+/* ---------- Navigation ---------- */
+
+.site-nav {
+  position: fixed;
+  inset-inline: 0;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px clamp(20px, 5vw, 64px);
+  background: linear-gradient(to bottom, rgba(9, 12, 19, 0.6), rgba(9, 12, 19, 0));
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink);
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: 0.5px;
+}
+
+.brand__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.nav-cta {
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 24px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(232, 177, 60, 0.12);
+  transition: background 0.25s ease;
+}
+
+.nav-cta:hover {
+  background: rgba(232, 177, 60, 0.25);
+}
+
+/* ---------- Scroll-driven hero ---------- */
+
+/* Section runway: 300vh of scroll while the stage stays pinned at 100vh. */
+.hero {
+  position: relative;
+  height: 300vh;
+}
+
+.hero__stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+  /* The poster sits behind the video: it doubles as the loading backdrop
+     and as the automatic fallback if the video fails to load. */
+  background: #05070c url("../video/hero-poster.jpg") center / cover no-repeat;
+}
+
+.hero__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  transform: translateZ(0);
+  pointer-events: none;
+}
+
+.hero__stage.is-ready .hero__video {
+  opacity: 1;
+}
+
+/* Very subtle scrim — keeps copy readable without hiding the video. */
+.hero__scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(6, 9, 15, 0.5) 0%,
+    rgba(6, 9, 15, 0.12) 28%,
+    rgba(6, 9, 15, 0.12) 62%,
+    rgba(6, 9, 15, 0.62) 100%
+  );
+}
+
+.hero__content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 24px;
+}
+
+/* Intro copy — driven by the --intro CSS variable (0 = visible, 1 = gone). */
+.hero__intro {
+  max-width: 880px;
+  opacity: calc(1 - var(--intro, 0));
+  transform: translateY(calc(var(--intro, 0) * -44px));
+  will-change: opacity, transform;
+}
+
+.hero__stage.intro-hidden .hero__intro {
+  visibility: hidden;
+}
+
+.hero__headline {
+  font-size: clamp(34px, 6vw, 72px);
+  font-weight: 800;
+  line-height: 1.25;
+  text-shadow: 0 2px 28px rgba(0, 0, 0, 0.5);
+}
+
+.hero__subtitle {
+  margin: 18px auto 0;
+  max-width: 720px;
+  color: #d6dcea;
+  font-size: clamp(15px, 1.9vw, 19px);
+  line-height: 2;
+  text-shadow: 0 1px 16px rgba(0, 0, 0, 0.5);
+}
+
+.hero__cta {
+  display: inline-block;
+  margin-top: 28px;
+  padding: 14px 36px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #171106;
+  font-weight: 700;
+  font-size: 16px;
+  text-decoration: none;
+  box-shadow: 0 10px 30px rgba(232, 177, 60, 0.25);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.hero__cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 36px rgba(232, 177, 60, 0.35);
+}
+
+/* Feature reveal — shown once the scrubbed video passes the 5s mark. */
+.hero__features {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 96px 24px 48px;
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+  pointer-events: none;
+}
+
+.hero__features.is-visible {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.hero__features-title {
+  font-size: clamp(26px, 3.4vw, 44px);
+  font-weight: 800;
+  margin-bottom: 28px;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.5);
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  width: 100%;
+  max-width: 980px;
+}
+
+.feature {
+  padding: 22px 24px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  text-align: right;
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.hero__features.is-visible .feature {
+  opacity: 1;
+  transform: none;
+}
+
+.hero__features.is-visible .feature:nth-child(1) { transition-delay: 0.05s; }
+.hero__features.is-visible .feature:nth-child(2) { transition-delay: 0.15s; }
+.hero__features.is-visible .feature:nth-child(3) { transition-delay: 0.25s; }
+.hero__features.is-visible .feature:nth-child(4) { transition-delay: 0.35s; }
+
+.feature h3 {
+  color: var(--accent);
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.feature p {
+  color: #c7cfdd;
+  font-size: 14.5px;
+  line-height: 1.9;
+}
+
+/* Minimal premium loading indicator. */
+.hero__loading {
+  position: absolute;
+  bottom: 42px;
+  left: 50%;
+  width: 180px;
+  height: 2px;
+  transform: translateX(-50%);
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.18);
+  overflow: hidden;
+  transition: opacity 0.4s ease;
+}
+
+.hero__loading::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  border-radius: 2px;
+  background: var(--accent);
+  animation: hero-load-slide 1.2s ease-in-out infinite;
+}
+
+@keyframes hero-load-slide {
+  0% { transform: translateX(260%); }
+  100% { transform: translateX(-260%); }
+}
+
+.hero__stage.is-ready .hero__loading {
+  opacity: 0;
+}
+
+/* Reduced motion: static poster hero, no scrub animation. */
+.hero--static {
+  height: 100vh;
+}
+
+.hero--static .hero__features {
+  display: none;
+}
+
+/* ---------- Registration section ---------- */
+
+.register {
+  padding: 120px 24px;
+  text-align: center;
+}
+
+.register__title {
+  font-size: clamp(28px, 3.6vw, 46px);
+  font-weight: 800;
+}
+
+.register__text {
+  margin: 18px auto 32px;
+  max-width: 640px;
+  color: var(--muted);
+  font-size: 17px;
+  line-height: 2;
+}
+
+.register__cta {
+  display: inline-block;
+  padding: 15px 40px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #171106;
+  font-weight: 700;
+  font-size: 16px;
+  text-decoration: none;
+  transition: transform 0.25s ease;
+}
+
+.register__cta:hover {
+  transform: translateY(-2px);
+}
+
+.site-footer {
+  padding: 30px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* ---------- Mobile ---------- */
+
+@media (max-width: 720px) {
+  .features-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    max-width: 440px;
+  }
+
+  .feature {
+    padding: 18px 20px;
+  }
+
+  .hero__features {
+    padding: 84px 18px 40px;
+  }
+
+  .register {
+    padding: 90px 20px;
+  }
+}

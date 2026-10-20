@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>تفریحان | همکاری با تفریحان</title>
+  <meta name="description" content="بدون هیچ هزینه‌ای، فروش خود را با تفریحان افزایش دهید." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+  <header class="site-nav">
+    <a class="brand" href="/">تفریحـان<span class="brand__dot"></span></a>
+    <a class="nav-cta" href="#register">شروع همکاری</a>
+  </header>
+
+  <main>
+    <!--
+      Scroll-driven hero: the section is 300vh tall while the stage is sticky at 100vh,
+      so scrolling through the section scrubs the video timeline (0% -> 0s, 100% -> 8s).
+
+      Encoding notes for smooth scrubbing (assets/video):
+        hero.mp4 : H.264 High, yuv420p, CRF 21, keyframe every 12 frames (0.5s),
+                   NO B-frames, faststart — this is what makes random-access seeking fast.
+        hero.webm: VP9 fallback source with the same keyframe cadence.
+        The clip is 8s @ 864x480, ~4.3Mbps, audio stripped (the hero is always muted).
+    -->
+    <section class="hero" id="hero" aria-label="همکاری با تفریحان">
+      <div class="hero__stage" id="heroStage">
+        <video id="heroVideo" class="hero__video" muted playsinline preload="auto" disablepictureinpicture tabindex="-1" aria-hidden="true">
+          <source src="assets/video/hero.webm" type="video/webm" />
+          <source src="assets/video/hero.mp4" type="video/mp4" />
+        </video>
+        <div class="hero__scrim" aria-hidden="true"></div>
+
+        <div class="hero__content">
+          <div class="hero__intro" id="heroIntro">
+            <h1 class="hero__headline">همکاری با تفریحان</h1>
+            <p class="hero__subtitle">بدون هیچ هزینه‌ای، فروش خود را با تفریحان افزایش دهید. ما اطلاعات و تبلیغات شما را در تمام کانال‌هایمان منتشر می‌کنیم و فقط در ازای فروش موفق، مبلغی به عنوان کمیسیون دریافت می‌کنیم.</p>
+            <a class="hero__cta" href="#register">شروع همکاری</a>
+          </div>
+
+          <div class="hero__features" id="heroFeatures" aria-hidden="true">
+            <h2 class="hero__features-title">چرا با تفریحان همکاری کنید؟</h2>
+            <div class="features-grid">
+              <article class="feature">
+                <h3>تبلیغات گسترده رایگان</h3>
+                <p>معرفی مجموعه شما در سایت تفریحان، اینستاگرام، تلگرام و ربات بله بدون پرداخت هیچ هزینه‌ای.</p>
+              </article>
+              <article class="feature">
+                <h3>افزایش چشمگیر فروش</h3>
+                <p>دسترسی به پایگاه کاربران گسترده تفریحان و هدایت آن‌ها به سمت خرید بلیط مجموعه شما.</p>
+              </article>
+              <article class="feature">
+                <h3>مدل همکاری برد-برد</h3>
+                <p>ما فقط در ازای فروش موفق بلیط، درصد کمیسیون توافقی دریافت می‌کنیم. ریسک شما صفر است.</p>
+              </article>
+              <article class="feature">
+                <h3>پشتیبانی و مدیریت</h3>
+                <p>مدیریت آسان بلیط‌ها و مشاهده آمار فروش از طریق پنل اختصاصی تامین‌کنندگان.</p>
+              </article>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero__loading" id="heroLoading" aria-hidden="true"></div>
+      </div>
+    </section>
+
+    <section class="register" id="register">
+      <h2 class="register__title">آماده همکاری هستید؟</h2>
+      <p class="register__text">همین امروز به جمع تامین‌کنندگان تفریحان بپیوندید و فروش بلیط مجموعه خود را به سطح جدیدی برسانید.</p>
+      <a class="register__cta" href="#register">ثبت‌نام تامین‌کنندگان</a>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>تفریحان — پلتفرم گردشگری و تفریح</p>
+  </footer>
+
+  <script src="assets/js/scroll-hero.js" defer></script>
+</body>
+</html>
