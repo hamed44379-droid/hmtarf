@@ -13,19 +13,20 @@
 <body>
   <header class="site-nav">
     <a class="brand" href="/">تفریحـان<span class="brand__dot"></span></a>
-    <a class="nav-cta" href="#register">شروع همکاری</a>
   </header>
 
   <main>
     <!--
-      Scroll-driven hero: the section is 300vh tall while the stage is sticky at 100vh,
-      so scrolling through the section scrubs the video timeline (0% -> 0s, 100% -> 8s).
+      Scroll-driven hero: the section runway is 420vh while the stage is sticky at 100vh.
+      Scroll phases: 0–12% intro fades out, 0–60% scrubs the video (0s → 8s),
+      60–70% video holds its final frame under the features, 70–92% shows the
+      collaboration-model steps, 92%+ shows the registration form — all pinned.
 
       Encoding notes for smooth scrubbing (assets/video):
         hero.mp4 : H.264 High, yuv420p, CRF 21, keyframe every 12 frames (0.5s),
                    NO B-frames, faststart — this is what makes random-access seeking fast.
         hero.webm: VP9 fallback source with the same keyframe cadence.
-        The clip is 8s @ 864x480, ~4.3Mbps, audio stripped (the hero is always muted).
+        The clip is 8s @ 864x480, audio stripped (the hero is always muted).
     -->
     <section class="hero" id="hero" aria-label="همکاری با تفریحان">
       <div class="hero__stage" id="heroStage">
@@ -39,7 +40,6 @@
           <div class="hero__intro" id="heroIntro">
             <h1 class="hero__headline">همکاری با تفریحان</h1>
             <p class="hero__subtitle">بدون هیچ هزینه‌ای، فروش خود را با تفریحان افزایش دهید. ما اطلاعات و تبلیغات شما را در تمام کانال‌هایمان منتشر می‌کنیم و فقط در ازای فروش موفق، مبلغی به عنوان کمیسیون دریافت می‌کنیم.</p>
-            <a class="hero__cta" href="#register">شروع همکاری</a>
           </div>
 
           <div class="hero__features" id="heroFeatures" aria-hidden="true">
@@ -63,16 +63,69 @@
               </article>
             </div>
           </div>
+
+          <div class="hero__steps" id="heroSteps" aria-hidden="true">
+            <h2 class="hero__steps-title">مدل همکاری به چه صورت است؟</h2>
+            <div class="steps-grid">
+              <article class="step">
+                <span class="step__num">۱</span>
+                <h3>ثبت نام سریع</h3>
+                <p>اطلاعات مجموعه خود را در فرم ثبت نام وارد کنید.</p>
+              </article>
+              <article class="step">
+                <span class="step__num">۲</span>
+                <h3>انتشار در کانال‌ها</h3>
+                <p>ما تفریحات شما را در تمام کانال‌های تفریحان به صورت رایگان تبلیغ می‌کنیم.</p>
+              </article>
+              <article class="step">
+                <span class="step__num">۳</span>
+                <h3>فروش بلیط</h3>
+                <p>کاربران از طریق تفریحان بلیط مجموعه شما را خریداری می‌کنند.</p>
+              </article>
+              <article class="step">
+                <span class="step__num">۴</span>
+                <h3>دریافت کمیسیون</h3>
+                <p>تفریحان درصد کمیسیون توافقی را از فروش موفق دریافت می‌کند.</p>
+              </article>
+            </div>
+          </div>
+
+          <div class="hero__form" id="heroForm" aria-hidden="true">
+            <h2 class="hero__form-title">ثبت‌نام تامین‌کنندگان</h2>
+            <form id="supplierForm" class="form-card">
+              <label>
+                <span>نام مجموعه شما</span>
+                <input type="text" name="complexName" required autocomplete="organization" />
+              </label>
+              <label>
+                <span>نام و نام خانوادگی مدیر عامل</span>
+                <input type="text" name="managerName" required autocomplete="name" />
+              </label>
+              <label>
+                <span>شماره تماس</span>
+                <input type="tel" name="phone" required autocomplete="tel" inputmode="tel" />
+              </label>
+              <button type="submit" class="form-submit">ثبت‌نام</button>
+            </form>
+            <p class="form-success" id="formSuccess" hidden>ثبت‌نام شما با موفقیت انجام شد. به زودی با شما تماس می‌گیریم.</p>
+            <p class="hero__phone">مشاوره رایگان: <span class="hero__phone-number">90008408</span></p>
+          </div>
+        </div>
+
+        <div class="hero__stats" aria-hidden="false">
+          <div class="stat"><strong>+1000</strong><span>مجموعه تفریحی همکار</span></div>
+          <div class="stat"><strong>+500 هزار</strong><span>کاربر فعال در سامانه</span></div>
+          <div class="stat"><strong>+1 میلیون</strong><span>بازدید ماهیانه</span></div>
+          <div class="stat"><strong>۹۹٪</strong><span>رضایت تامین‌کنندگان و خریداران</span></div>
+        </div>
+
+        <div class="hero__scroll-hint" aria-hidden="true">
+          <span class="mouse"></span>
+          <span>اسکرول کنید</span>
         </div>
 
         <div class="hero__loading" id="heroLoading" aria-hidden="true"></div>
       </div>
-    </section>
-
-    <section class="register" id="register">
-      <h2 class="register__title">آماده همکاری هستید؟</h2>
-      <p class="register__text">همین امروز به جمع تامین‌کنندگان تفریحان بپیوندید و فروش بلیط مجموعه خود را به سطح جدیدی برسانید.</p>
-      <a class="register__cta" href="#register">ثبت‌نام تامین‌کنندگان</a>
     </section>
   </main>
 

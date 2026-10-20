@@ -33,7 +33,6 @@ body {
   z-index: 40;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   padding: 18px clamp(20px, 5vw, 64px);
   background: linear-gradient(to bottom, rgba(9, 12, 19, 0.6), rgba(9, 12, 19, 0));
 }
@@ -56,28 +55,14 @@ body {
   background: var(--accent);
 }
 
-.nav-cta {
-  color: var(--ink);
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 600;
-  padding: 10px 24px;
-  border-radius: 999px;
-  border: 1px solid var(--line);
-  background: rgba(232, 177, 60, 0.12);
-  transition: background 0.25s ease;
-}
-
-.nav-cta:hover {
-  background: rgba(232, 177, 60, 0.25);
-}
-
 /* ---------- Scroll-driven hero ---------- */
 
-/* Section runway: 300vh of scroll while the stage stays pinned at 100vh. */
+/* Section runway: 420vh of scroll while the stage stays pinned at 100vh.
+   Phases: intro (0–12%), video scrub (0–60%), features (from 5s of video,
+   until 70%), model steps (70–92%), registration form (92%+). */
 .hero {
   position: relative;
-  height: 300vh;
+  height: 420vh;
 }
 
 .hero__stage {
@@ -123,22 +108,45 @@ body {
 .hero__content {
   position: absolute;
   inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 0 24px;
 }
 
 /* Intro copy — driven by the --intro CSS variable (0 = visible, 1 = gone). */
 .hero__intro {
-  max-width: 880px;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 24px;
   opacity: calc(1 - var(--intro, 0));
-  transform: translateY(calc(var(--intro, 0) * -44px));
   will-change: opacity, transform;
 }
 
-.hero__stage.intro-hidden .hero__intro {
+/* Soft dark halo behind the headline + subtitle for readability. */
+.hero__intro::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(860px, 92vw);
+  height: 420px;
+  transform: translate(-50%, -52%);
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(4, 6, 11, 0.6) 0%,
+    rgba(4, 6, 11, 0.38) 48%,
+    rgba(4, 6, 11, 0) 74%
+  );
+  z-index: -1;
+  pointer-events: none;
+}
+
+.hero__stage.intro-hidden .hero__intro,
+.hero__stage.intro-hidden .hero__stats,
+.hero__stage.intro-hidden .hero__scroll-hint {
   visibility: hidden;
 }
 
@@ -158,27 +166,95 @@ body {
   text-shadow: 0 1px 16px rgba(0, 0, 0, 0.5);
 }
 
-.hero__cta {
-  display: inline-block;
-  margin-top: 28px;
-  padding: 14px 36px;
-  border-radius: 999px;
-  background: var(--accent);
-  color: #171106;
-  font-weight: 700;
-  font-size: 16px;
-  text-decoration: none;
-  box-shadow: 0 10px 30px rgba(232, 177, 60, 0.25);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+/* Stats strip — bottom of the first section, fades away with the intro. */
+.hero__stats {
+  position: absolute;
+  inset-inline: 24px;
+  bottom: 96px;
+  margin: 0 auto;
+  max-width: 940px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  text-align: center;
+  opacity: calc(1 - var(--intro, 0));
 }
 
-.hero__cta:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 14px 36px rgba(232, 177, 60, 0.35);
+.stat {
+  padding: 14px 10px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--card);
 }
 
-/* Feature reveal — shown once the scrubbed video passes the 5s mark. */
-.hero__features {
+.stat strong {
+  display: block;
+  color: var(--accent);
+  font-size: clamp(18px, 2.2vw, 26px);
+  font-weight: 800;
+}
+
+.stat span {
+  display: block;
+  margin-top: 4px;
+  color: #c7cfdd;
+  font-size: 13px;
+}
+
+/* Mouse-scroll indicator (replaces the old CTA button). */
+.hero__scroll-hint {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.hero__stage.is-ready .hero__scroll-hint {
+  opacity: calc(1 - var(--intro, 0));
+}
+
+.hero__scroll-hint span:last-child {
+  font-size: 12px;
+  color: #c7cfdd;
+}
+
+.mouse {
+  width: 24px;
+  height: 40px;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  border-radius: 13px;
+  position: relative;
+}
+
+.mouse::before {
+  content: "";
+  position: absolute;
+  top: 7px;
+  left: 50%;
+  width: 4px;
+  height: 8px;
+  margin-left: -2px;
+  border-radius: 2px;
+  background: #fff;
+  animation: mouse-wheel 1.6s ease infinite;
+}
+
+@keyframes mouse-wheel {
+  0% { opacity: 1; transform: translateY(0); }
+  70% { opacity: 0; transform: translateY(9px); }
+  100% { opacity: 0; transform: translateY(9px); }
+}
+
+/* Pinned overlay phases — shown/hidden by .is-visible. */
+.hero__features,
+.hero__steps,
+.hero__form {
   position: absolute;
   inset: 0;
   display: flex;
@@ -190,22 +266,30 @@ body {
   transform: translateY(24px);
   transition: opacity 0.6s ease, transform 0.6s ease;
   pointer-events: none;
+  visibility: hidden;
 }
 
-.hero__features.is-visible {
+.hero__features.is-visible,
+.hero__steps.is-visible,
+.hero__form.is-visible {
   opacity: 1;
   transform: none;
   pointer-events: auto;
+  visibility: visible;
 }
 
-.hero__features-title {
+.hero__features-title,
+.hero__steps-title,
+.hero__form-title {
   font-size: clamp(26px, 3.4vw, 44px);
   font-weight: 800;
   margin-bottom: 28px;
   text-shadow: 0 2px 24px rgba(0, 0, 0, 0.5);
 }
 
-.features-grid {
+/* Feature cards + model steps share the tile grid. */
+.features-grid,
+.steps-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
@@ -213,7 +297,8 @@ body {
   max-width: 980px;
 }
 
-.feature {
+.feature,
+.step {
   padding: 22px 24px;
   border-radius: 18px;
   border: 1px solid var(--line);
@@ -224,33 +309,136 @@ body {
   transition: opacity 0.5s ease, transform 0.5s ease;
 }
 
-.hero__features.is-visible .feature {
+.hero__features.is-visible .feature,
+.hero__steps.is-visible .step {
   opacity: 1;
   transform: none;
 }
 
-.hero__features.is-visible .feature:nth-child(1) { transition-delay: 0.05s; }
-.hero__features.is-visible .feature:nth-child(2) { transition-delay: 0.15s; }
-.hero__features.is-visible .feature:nth-child(3) { transition-delay: 0.25s; }
-.hero__features.is-visible .feature:nth-child(4) { transition-delay: 0.35s; }
+.hero__features.is-visible .feature:nth-child(1),
+.hero__steps.is-visible .step:nth-child(1) { transition-delay: 0.05s; }
+.hero__features.is-visible .feature:nth-child(2),
+.hero__steps.is-visible .step:nth-child(2) { transition-delay: 0.15s; }
+.hero__features.is-visible .feature:nth-child(3),
+.hero__steps.is-visible .step:nth-child(3) { transition-delay: 0.25s; }
+.hero__features.is-visible .feature:nth-child(4),
+.hero__steps.is-visible .step:nth-child(4) { transition-delay: 0.35s; }
 
-.feature h3 {
+.feature h3,
+.step h3 {
   color: var(--accent);
   font-size: 17px;
   font-weight: 700;
   margin-bottom: 8px;
 }
 
-.feature p {
+.feature p,
+.step p {
   color: #c7cfdd;
   font-size: 14.5px;
   line-height: 1.9;
 }
 
+.step__num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin-bottom: 12px;
+  border-radius: 50%;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-weight: 800;
+  font-size: 15px;
+}
+
+/* Registration form — final pinned phase, video held at its last frame. */
+.form-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 520px;
+  padding: 28px;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  text-align: right;
+}
+
+.form-card[hidden] {
+  display: none;
+}
+
+.form-card label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #d6dcea;
+  font-size: 14px;
+}
+
+.form-card input {
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 15px;
+}
+
+.form-card input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.form-submit {
+  margin-top: 6px;
+  padding: 13px;
+  border: none;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #171106;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform 0.25s ease;
+}
+
+.form-submit:hover {
+  transform: translateY(-2px);
+}
+
+.form-success {
+  margin-top: 14px;
+  padding: 14px 22px;
+  border-radius: 14px;
+  border: 1px solid rgba(232, 177, 60, 0.5);
+  background: rgba(232, 177, 60, 0.12);
+  color: var(--ink);
+  font-size: 15px;
+}
+
+.hero__phone {
+  margin-top: 16px;
+  color: #d6dcea;
+  font-size: 15px;
+}
+
+.hero__phone-number {
+  color: var(--accent);
+  font-weight: 700;
+  direction: ltr;
+  unicode-bidi: embed;
+}
+
 /* Minimal premium loading indicator. */
 .hero__loading {
   position: absolute;
-  bottom: 42px;
+  bottom: 30px;
   left: 50%;
   width: 180px;
   height: 2px;
@@ -285,44 +473,12 @@ body {
   height: 100vh;
 }
 
-.hero--static .hero__features {
+.hero--static .hero__features,
+.hero--static .hero__steps,
+.hero--static .hero__form,
+.hero--static .hero__stats,
+.hero--static .hero__scroll-hint {
   display: none;
-}
-
-/* ---------- Registration section ---------- */
-
-.register {
-  padding: 120px 24px;
-  text-align: center;
-}
-
-.register__title {
-  font-size: clamp(28px, 3.6vw, 46px);
-  font-weight: 800;
-}
-
-.register__text {
-  margin: 18px auto 32px;
-  max-width: 640px;
-  color: var(--muted);
-  font-size: 17px;
-  line-height: 2;
-}
-
-.register__cta {
-  display: inline-block;
-  padding: 15px 40px;
-  border-radius: 999px;
-  background: var(--accent);
-  color: #171106;
-  font-weight: 700;
-  font-size: 16px;
-  text-decoration: none;
-  transition: transform 0.25s ease;
-}
-
-.register__cta:hover {
-  transform: translateY(-2px);
 }
 
 .site-footer {
@@ -336,21 +492,31 @@ body {
 /* ---------- Mobile ---------- */
 
 @media (max-width: 720px) {
-  .features-grid {
+  .features-grid,
+  .steps-grid {
     grid-template-columns: 1fr;
     gap: 12px;
     max-width: 440px;
   }
 
-  .feature {
+  .feature,
+  .step {
     padding: 18px 20px;
   }
 
-  .hero__features {
-    padding: 84px 18px 40px;
+  .hero__features,
+  .hero__steps,
+  .hero__form {
+    padding: 84px 18px 130px;
+    overflow-y: auto;
   }
 
-  .register {
-    padding: 90px 20px;
+  .hero__stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    bottom: 92px;
+  }
+
+  .hero__intro::before {
+    height: 520px;
   }
 }

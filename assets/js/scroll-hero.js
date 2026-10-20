@@ -3,7 +3,15 @@
  *
  * The user's scroll position is the ONLY thing that moves the video forward:
  * no autoplay, no loop, no play(). Scrolling scrubs video.currentTime through
- * the full 8s timeline across the hero's 300vh runway.
+ * the full 8s timeline across the hero runway (420vh, video completes at 60%
+ * of it and then HOLDS its final frame while the steps/form phases load).
+ *
+ * Scroll phases (fraction of the runway):
+ *   0.00–0.12  intro headline/subtitle (+ stats + scroll hint) fade away
+ *   0.00–0.60  video scrubs 0s → 8s; feature copy appears at the 5s mark
+ *   0.60–0.70  video HOLDS its final frame under the features
+ *   0.70–0.92  collaboration-model steps replace the features (video still held)
+ *   0.92–1.00  registration form replaces the steps (video still held)
  *
  * Architecture (performance-critical):
  *   - ONE passive scroll listener. It only computes targetTime.
@@ -16,6 +24,8 @@
  *
  * Encoding notes for smooth scrubbing (see index.html): frequent keyframes
  * (0.5s), no B-frames, faststart, modest resolution/bitrate, muted clip.
+ * NOTE: the HTTP server must support Range requests, or browsers treat the
+ * video as unseekable and currentTime scrubs snap back to 0.
  */
 (() => {
   "use strict";
@@ -24,8 +34,10 @@
   const stage = document.getElementById("heroStage");
   const video = document.getElementById("heroVideo");
   const features = document.getElementById("heroFeatures");
+  const steps = document.getElementById("heroSteps");
+  const formPanel = document.getElementById("heroForm");
 
-  if (!hero || !stage || !video || !features) return;
+  if (!hero || !stage || !video || !features || !steps || !formPanel) return;
 
   // --- Tuning -------------------------------------------------------------
   const SMOOTHING = 0.18;     // per-frame lerp factor: responsive, no visible lag
@@ -33,19 +45,22 @@
   const MIN_SEEK = 0.02;      // seconds; don't seek for sub-half-frame changes
   const INTRO_RANGE = 0.12;   // intro copy fully faded after 12% of the runway
   const FEATURES_AT = 5;      // reveal the feature copy at t >= 5s of the video
+  const VIDEO_END = 0.6;      // runway fraction at which the video reaches 100%
+  const STEPS_P = 0.7;        // runway fraction where the model steps appear
+  const FORM_P = 0.92;        // runway fraction where the registration form appears
 
   const clamp = (v, lo, hi) => Math.min(Math.max(v, lo), hi);
 
-  // --- State --------------------------------------------------------------
-  let duration = 0;
-  let sectionTop = 0;
-  let scrollSpan = 1;
-  let targetTime = 0;
-  let renderTime = 0;
-  let rafId = null;
-  let scrubReady = false;      // enough data buffered to scrub without stalls
-  let lastIntro = -1;
-  let featuresShown = false;
+  // --- Registration form (independent of the scrub experience) -------------
+  const form = document.getElementById("supplierForm");
+  if (form) {
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      form.hidden = true;
+      const success = document.getElementById("formSuccess");
+      if (success) success.hidden = false;
+    });
+  }
 
   // --- Reduced motion: static poster hero, video never loads ---------------
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -59,6 +74,20 @@
     return;
   }
 
+  // --- State --------------------------------------------------------------
+  let duration = 0;
+  let sectionTop = 0;
+  let scrollSpan = 1;
+  let lastProgress = 0;
+  let targetTime = 0;
+  let renderTime = 0;
+  let rafId = null;
+  let scrubReady = false;      // enough data buffered to scrub without stalls
+  let lastIntro = -1;
+  let featuresShown = false;
+  let stepsShown = false;
+  let formShown = false;
+
   // --- Measurement --------------------------------------------------------
   function measure() {
     const rect = hero.getBoundingClientRect();
@@ -68,14 +97,15 @@
 
   function updateTarget() {
     const progress = clamp((window.scrollY - sectionTop) / scrollSpan, 0, 1);
-    targetTime = duration > 0 ? progress * duration : 0;
-    return progress;
+    lastProgress = progress;
+    // 0–60% of the runway scrubs the whole video; beyond 60% the video
+    // holds its final frame while the later phases load.
+    targetTime = duration > 0 ? clamp(progress / VIDEO_END, 0, 1) * duration : 0;
   }
 
-  // --- Overlay text (direct DOM writes, no state) --------------------------
+  // --- Overlay phases (direct DOM writes, no state) ------------------------
   function updateOverlays() {
-    const progress = duration > 0 ? targetTime / duration : 0;
-    const intro = clamp(progress / INTRO_RANGE, 0, 1);
+    const intro = clamp(lastProgress / INTRO_RANGE, 0, 1);
 
     if (Math.abs(intro - lastIntro) > 0.004) {
       lastIntro = intro;
@@ -83,11 +113,25 @@
       stage.classList.toggle("intro-hidden", intro >= 0.999);
     }
 
-    const show = scrubReady && renderTime >= FEATURES_AT;
-    if (show !== featuresShown) {
-      featuresShown = show;
-      features.classList.toggle("is-visible", show);
-      features.setAttribute("aria-hidden", show ? "false" : "true");
+    const showFeatures = scrubReady && renderTime >= FEATURES_AT && lastProgress < STEPS_P;
+    if (showFeatures !== featuresShown) {
+      featuresShown = showFeatures;
+      features.classList.toggle("is-visible", showFeatures);
+      features.setAttribute("aria-hidden", showFeatures ? "false" : "true");
+    }
+
+    const showSteps = scrubReady && lastProgress >= STEPS_P && lastProgress < FORM_P;
+    if (showSteps !== stepsShown) {
+      stepsShown = showSteps;
+      steps.classList.toggle("is-visible", showSteps);
+      steps.setAttribute("aria-hidden", showSteps ? "false" : "true");
+    }
+
+    const showForm = scrubReady && lastProgress >= FORM_P;
+    if (showForm !== formShown) {
+      formShown = showForm;
+      formPanel.classList.toggle("is-visible", showForm);
+      formPanel.setAttribute("aria-hidden", showForm ? "false" : "true");
     }
   }
 
